@@ -1,4 +1,7 @@
 export default {
+  APP: {
+    PORT: 8082,
+  },
   KIS_URL: {
     real: {},
     mock: {},
