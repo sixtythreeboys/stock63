@@ -1,5 +1,6 @@
 package com.sixtythree.stock63.domestic.kospi.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Data;
@@ -19,12 +20,16 @@ public class KospiItem {
     private String mninClsCodeYn;
     private String lowCurrentYn;
     private String sprnStrrNmixIssuYn;
+    @Column(name="kospi200_apnt_cls_code")
     private String kospi200ApntClsCode;
+    @Column(name="kospi100_issu_yn")
     private String kospi100IssuYn;
+    @Column(name="kospi50_issu_yn")
     private String kospi50IssuYn;
     private String krxIssuYn;
     private String etpProdClsCode;
     private String elwPblcYn;
+    @Column(name="krx100_issu_yn")
     private String krx100IssuYn;
     private String krxCarYn;
     private String krxSmcnYn;
