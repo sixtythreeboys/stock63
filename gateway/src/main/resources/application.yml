@@ -12,8 +12,14 @@ eureka:
 spring:
   application:
     name: gateway
-#  cloud:
-#    gateway:
-#      routes:
-#        - id: domestic
-#          uri: http://localhost:8081/
+  cloud:
+    gateway:
+      routes:
+        - id: domestic
+          uri: lb://DOMESTIC
+          predicates:
+            - Path=/domestic/**
+        - id: oversea
+          uri: lb://oversea
+          predicates:
+            - Path=/oversea/**
