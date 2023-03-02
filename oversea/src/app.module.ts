@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { MockModule } from './mock/mock.module';
+import { OverseaModule } from './oversea/oversea.module';
 
 @Module({
-  imports: [MockModule],
+  imports: [OverseaModule],
   controllers: [],
   providers: [],
 })
