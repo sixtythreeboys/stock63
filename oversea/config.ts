@@ -31,23 +31,27 @@ export default {
   },
   EUREKA: {
     instance: {
-      app: 'my-node-app',
+      app: 'overseaApp',
       hostName: 'localhost',
       ipAddr: '127.0.0.1',
       port: {
         $: 8082,
         '@enabled': 'true',
       },
-      vipAddress: 'my-node-app',
+      vipAddress: 'overseaApp',
       dataCenterInfo: {
         '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
         name: 'MyOwn',
       },
     },
     eureka: {
-      host: 'eureka-server-hostname',
-      port: 8761,
-      servicePath: '/eureka/apps/',
+      //port: 8761,
+      serviceUrls: {
+        default: ['http://localhost:8761/eureka/'],
+      },
+      fetchRegistry: true,
+      registerWithEureka: true,
+      preferIpAddress: true,
     },
   },
 };
