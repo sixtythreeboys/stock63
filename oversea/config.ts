@@ -43,7 +43,7 @@ export default {
     eureka: {
       host: 'localhost',
       port: 8761,
-      servicePath: '/eureka/',
+      servicePath: '/',
       preferIpAddress: true, // This will use the IP address instead of the hostname for registration
       fetchRegistry: true,
       registerWithEureka: true,

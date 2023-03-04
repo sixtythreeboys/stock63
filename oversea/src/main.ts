@@ -7,11 +7,11 @@ import init from './common/init';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   await init();
+  await app.listen(config.APP.PORT);
   try {
     eureka();
   } catch (e) {
     console.log(e);
   }
-  await app.listen(config.APP.PORT);
 }
 bootstrap();
