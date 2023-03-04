@@ -45,13 +45,15 @@ export default {
       },
     },
     eureka: {
-      //port: 8761,
-      serviceUrls: {
-        default: ['http://localhost:8761/eureka/'],
-      },
+      host: 'localhost',
+      port: 8761,
+      servicePath: '/eureka/',
+      preferIpAddress: true, // This will use the IP address instead of the hostname for registration
       fetchRegistry: true,
       registerWithEureka: true,
-      preferIpAddress: true,
+      serviceUrls: {
+        default: 'http://localhost:8761/eureka/', // Replace with your own Eureka server URL
+      },
     },
   },
 };
