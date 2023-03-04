@@ -8,10 +8,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   await init();
   await app.listen(config.APP.PORT);
-  try {
-    eureka();
-  } catch (e) {
-    console.log(e);
-  }
+  eureka();
 }
 bootstrap();

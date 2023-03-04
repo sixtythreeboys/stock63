@@ -31,17 +31,17 @@ export default {
   },
   EUREKA: {
     instance: {
-      app: 'overseaApp',
-      hostName: 'localhost',
-      ipAddr: '127.0.0.1',
+      app: 'oversea',
+      //hostName: 'localhost',
+      //ipAddr: '127.0.0.1',
       port: '8082',
-      vipAddress: 'overseaApp',
+      vipAddress: 'oversea',
       dataCenterInfo: {
         name: 'MyOwn',
       },
     },
     eureka: {
-      host: 'http://15.164.171.244/',
+      host: 'localhost',
       port: '8761',
       servicePath: '/eureka',
       preferIpAddress: true, // This will use the IP address instead of the hostname for registration
