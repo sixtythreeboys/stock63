@@ -51,6 +51,7 @@ export default {
       preferIpAddress: true, // This will use the IP address instead of the hostname for registration
       fetchRegistry: true,
       registerWithEureka: true,
+      preferSameZone: false,
       serviceUrls: {
         default: 'http://localhost:8761/eureka/', // Replace with your own Eureka server URL
       },
