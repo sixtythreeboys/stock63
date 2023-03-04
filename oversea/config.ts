@@ -34,16 +34,16 @@ export default {
       app: 'overseaApp',
       hostName: 'localhost',
       ipAddr: '127.0.0.1',
-      port: 8082,
+      port: '8082',
       vipAddress: 'overseaApp',
       dataCenterInfo: {
         name: 'MyOwn',
       },
     },
     eureka: {
-      host: 'localhost',
-      port: 8761,
-      servicePath: '/',
+      host: 'http://15.164.171.244/',
+      port: '8761',
+      servicePath: '/eureka',
       preferIpAddress: true, // This will use the IP address instead of the hostname for registration
       fetchRegistry: true,
       registerWithEureka: true,
