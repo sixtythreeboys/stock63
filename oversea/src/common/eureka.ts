@@ -1,9 +1,9 @@
 import { Eureka } from 'eureka-js-client';
 import config from 'config';
 
-const client = new Eureka(config.EUREKA);
-
 export function apply() {
+  console.log(config.EUREKA);
+  const client = new Eureka(config.EUREKA);
   client.start();
   process.on('SIGINT', () => {
     client.stop(() => {

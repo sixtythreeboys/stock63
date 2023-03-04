@@ -34,13 +34,9 @@ export default {
       app: 'overseaApp',
       hostName: 'localhost',
       ipAddr: '127.0.0.1',
-      port: {
-        $: 8082,
-        '@enabled': 'true',
-      },
+      port: 8082,
       vipAddress: 'overseaApp',
       dataCenterInfo: {
-        '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
         name: 'MyOwn',
       },
     },
@@ -51,10 +47,9 @@ export default {
       preferIpAddress: true, // This will use the IP address instead of the hostname for registration
       fetchRegistry: true,
       registerWithEureka: true,
-      preferSameZone: false,
-      serviceUrls: {
-        default: 'http://localhost:8761/eureka/', // Replace with your own Eureka server URL
-      },
+      // serviceUrls: {
+      //   default: 'http://localhost:8761/eureka/', // Replace with your own Eureka server URL
+      // },
     },
   },
 };
