@@ -34,17 +34,19 @@ export default {
       app: 'oversea',
       //hostName: 'localhost',
       //ipAddr: '127.0.0.1',
+      statusPageUrl: 'http://localhost:8082',
       port: '8082',
       vipAddress: 'oversea',
       dataCenterInfo: {
+        '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
         name: 'MyOwn',
       },
     },
     eureka: {
       host: 'localhost',
       port: '8761',
-      servicePath: '/eureka',
-      preferIpAddress: true, // This will use the IP address instead of the hostname for registration
+      servicePath: '/eureka/apps',
+      //preferIpAddress: true, // This will use the IP address instead of the hostname for registration
       fetchRegistry: true,
       registerWithEureka: true,
       // serviceUrls: {
