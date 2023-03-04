@@ -35,7 +35,10 @@ export default {
       //hostName: 'localhost',
       //ipAddr: '127.0.0.1',
       statusPageUrl: 'http://localhost:8082',
-      port: '8082',
+      port: {
+        $: 8082,
+        '@enabled': true,
+      },
       vipAddress: 'oversea',
       dataCenterInfo: {
         '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
