@@ -37,7 +37,7 @@ public class KospiDailySchedulerService {
     String appkey = "PSM3WXIVMo4X2UnaIJCubQl4M9RCNfbm5C6V";
     String appsecret = "6J/t0za0MCCNCb74d0+/71iexBomHiT6NQJqx4YZandzS3k5Zb+gzgKdbyludx8xGnTzecmPpjspCteGLnGMVOnOIRpOCBV6Cqax4+xPkpj2rvk4NjNs8YR4PeGWoTb35T+wCnGYgalMOtoj1wcK4WDkg0XXA77jz+rE5qxULJbyA683TV8=";
 
-    @Scheduled(cron = "0 33 17 * * 1-5", zone = "KST")
+    @Scheduled(cron = "0 40 17 * * 1-5", zone = "Asia/Seoul")
     public void run() throws InterruptedException, ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         String date = sdf.format(new Date());
