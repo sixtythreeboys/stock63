@@ -10,10 +10,10 @@ import lombok.Data;
 @Data
 @Schema(description = "코스피 종목 정보")
 public class KospiItem {
+    @Id
     @Schema(description = "단축코드")
     private String mkscShrnIscd;
     @Schema(description = "표준코드")
-    @Id
     private String stndIscd;
     @Schema(description = "한글명")
     private String htsKorIsnm;

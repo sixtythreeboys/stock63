@@ -30,4 +30,11 @@ public class KospiController {
         return kospiService.stockList(period, gradient);
     }
 
+    @ResponseBody
+    @GetMapping("daily")
+    public int rankList() throws Exception {
+        return kospiService.inquireDailyItemChartPrice();
+    }
+
+
 }
