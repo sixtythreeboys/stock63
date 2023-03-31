@@ -20,6 +20,6 @@ spring:
           predicates:
             - Path=/domestic/**
         - id: oversea
-          uri: lb://oversea
+          uri: lb://OVERSEA
           predicates:
             - Path=/oversea/**
