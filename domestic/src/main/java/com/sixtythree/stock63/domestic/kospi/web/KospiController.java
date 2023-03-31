@@ -1,5 +1,6 @@
 package com.sixtythree.stock63.domestic.kospi.web;
 
+import com.sixtythree.stock63.domestic.kospi.dto.StockDto;
 import com.sixtythree.stock63.domestic.kospi.entity.KospiItem;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +22,7 @@ public class KospiController {
 
     @ResponseBody
     @GetMapping("list")
-    public ResponseEntity<List<KospiItem>> rankList(
+    public ResponseEntity<List<StockDto>> rankList(
             @Parameter(description = "연속 상승/하락 일수")
             @RequestParam(name ="period",required = false) int period,
             @Parameter(description = "상승: 1 / 하락: -1")
