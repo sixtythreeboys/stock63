@@ -8,7 +8,6 @@ import lombok.Data;
 
 @Entity
 @Data
-@Schema(description = "코스피 종목 정보")
 public class KospiItem {
     @Id
     @Schema(description = "단축코드")
@@ -49,8 +48,8 @@ public class KospiItem {
     private String KrxEnrgChmsYn;
     private String krxStelYn;
     private String shortOverClsCode;
-    private String krxMediCmncY;
-    private String nkrxCnstYn;
+    private String krxMediCmncYn;
+    private String krxCnstYn;
     private String krxFnncSvcYn;
     private String krxScrtYn;
     private String krxShipYn;
@@ -91,6 +90,7 @@ public class KospiItem {
     private String prstClsCode;
     private String sstsHotYn;
     private String stangeRunupYn;
+    @Column(name="krx300_issu_yn")
     private String krx300IssuYn;
     private String kospiIssuYn;
     @Schema(description = "매출액")

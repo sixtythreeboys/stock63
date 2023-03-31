@@ -37,7 +37,7 @@ public class KospiDailySchedulerService {
     String appkey = "PSM3WXIVMo4X2UnaIJCubQl4M9RCNfbm5C6V";
     String appsecret = "6J/t0za0MCCNCb74d0+/71iexBomHiT6NQJqx4YZandzS3k5Zb+gzgKdbyludx8xGnTzecmPpjspCteGLnGMVOnOIRpOCBV6Cqax4+xPkpj2rvk4NjNs8YR4PeGWoTb35T+wCnGYgalMOtoj1wcK4WDkg0XXA77jz+rE5qxULJbyA683TV8=";
 
-    @Scheduled(cron = "0 40 17 * * 1-5", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 30 23 * * 1-5", zone = "Asia/Seoul")
     public void run() throws InterruptedException, ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         String date = sdf.format(new Date());
@@ -93,8 +93,8 @@ public class KospiDailySchedulerService {
                     .queryParam("FID_PERIOD_DIV_CODE", "D")
                     .queryParam("FID_ORG_ADJ_PRC", "0")
                     .queryParam("FID_INPUT_ISCD", kospiItem.getMkscShrnIscd())
-                    .queryParam("FID_INPUT_DATE_1", "20230327")
-                    .queryParam("FID_INPUT_DATE_2", "20230330")
+                    .queryParam("FID_INPUT_DATE_1", date)
+                    .queryParam("FID_INPUT_DATE_2", date)
                     .build(true);
             request = new HttpEntity<>(headers);
             res = restTemplate.exchange(
