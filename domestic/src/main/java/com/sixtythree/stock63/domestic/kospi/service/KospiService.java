@@ -62,7 +62,7 @@ public class KospiService {
                 // period만큼 연속 상승인지 확인. / 값이 비어있는 경우 스킵
                 boolean isTrue = true;
                 for (int i=idx; i<=period; i++) {
-                    if (arr[idx] == null) continue;
+                    if (arr[i] == null) continue;
                     // 연속 상승이 아닌경우 false
                     if (pivot >= Integer.parseInt(arr[i].getStckClpr())) {
                         isTrue = false;
@@ -106,7 +106,7 @@ public class KospiService {
                 }
                 boolean isTrue = true;
                 for (int i=idx; i<=period; i++) {
-                    if (arr[idx] == null) continue;
+                    if (arr[i] == null) continue;
                     if (pivot <= Integer.parseInt(arr[i].getStckClpr())) {
                         isTrue = false;
                         break;
