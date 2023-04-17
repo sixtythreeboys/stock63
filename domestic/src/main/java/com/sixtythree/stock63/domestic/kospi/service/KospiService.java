@@ -52,7 +52,7 @@ public class KospiService {
                     idx++;
                 }
                 int pivot, start;
-                KospiDailyPrice last = new KospiDailyPrice();
+                KospiDailyPrice last = null;
                 if (idx < period) {
                     pivot = Integer.parseInt(arr[idx++].getStckClpr());
                     start = pivot;
@@ -71,7 +71,7 @@ public class KospiService {
                     pivot = Integer.parseInt(arr[i].getStckClpr());
                     last = arr[i];
                 }
-                if (isTrue) {
+                if (isTrue && last != null) {
                     double totalCtrt =Math.round(((double)(pivot - start) / pivot)*10000)/100.0;
                     double prdyCtrt = Math.round(((double)Integer.parseInt(last.getPrdyVrss()) / Integer.parseInt(last.getStckClpr()))*10000)/100.0;
                     StockDto stockDto = new StockDto(
@@ -97,7 +97,7 @@ public class KospiService {
                     idx++;
                 }
                 int pivot, start;
-                KospiDailyPrice last = new KospiDailyPrice();
+                KospiDailyPrice last = null;
                 if (idx < period) {
                     pivot = Integer.parseInt(arr[idx++].getStckClpr());
                     start = pivot;
@@ -114,7 +114,7 @@ public class KospiService {
                     pivot = Integer.parseInt(arr[i].getStckClpr());
                     last = arr[i];
                 }
-                if (isTrue) {
+                if (isTrue && last != null) {
                     // 변화율 정보도 포함시키기
                     double totalCtrt =Math.round(((double)(pivot - start) / pivot)*10000)/100.0;
                     double prdyCtrt = Math.round(((double)Integer.parseInt(last.getPrdyVrss()) / Integer.parseInt(last.getStckClpr()))*10000)/100.0;
