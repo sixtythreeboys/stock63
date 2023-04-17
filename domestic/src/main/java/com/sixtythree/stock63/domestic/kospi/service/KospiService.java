@@ -72,8 +72,8 @@ public class KospiService {
                     last = arr[i];
                 }
                 if (isTrue) {
-                    double totalCtrt =Math.round(((double)(pivot - start) / pivot)*100)/100.0;
-                    double prdyCtrt = Math.round(((double)Integer.parseInt(last.getPrdyVrss()) / Integer.parseInt(last.getStckClpr()))*100)/100.0;
+                    double totalCtrt =Math.round(((double)(pivot - start) / pivot)*10000)/100.0;
+                    double prdyCtrt = Math.round(((double)Integer.parseInt(last.getPrdyVrss()) / Integer.parseInt(last.getStckClpr()))*10000)/100.0;
                     StockDto stockDto = new StockDto(
                             kospiItem.getMkscShrnIscd(),
                             kospiItem.getHtsKorIsnm(),
@@ -116,8 +116,8 @@ public class KospiService {
                 }
                 if (isTrue) {
                     // 변화율 정보도 포함시키기
-                    double totalCtrt =Math.round(((double)(pivot - start) / pivot)*100)/100.0;
-                    double prdyCtrt = Math.round(((double)Integer.parseInt(last.getPrdyVrss()) / Integer.parseInt(last.getStckClpr()))*100)/100.0;
+                    double totalCtrt =Math.round(((double)(pivot - start) / pivot)*10000)/100.0;
+                    double prdyCtrt = Math.round(((double)Integer.parseInt(last.getPrdyVrss()) / Integer.parseInt(last.getStckClpr()))*10000)/100.0;
                     StockDto stockDto = new StockDto(
                             kospiItem.getMkscShrnIscd(),
                             kospiItem.getHtsKorIsnm(),
