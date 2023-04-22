@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-@ServerEndpoint(value = "domestic/kospi/realtime")
+@ServerEndpoint(value = "/domestic/kospi/realtime")
 @Service
 public class WebSocketKospi {
     private static Set<Session> CLIENTS = Collections.synchronizedSet(new HashSet<>());
