@@ -1,13 +1,24 @@
 package com.sixtythree.stock63.domestic.kospi.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sixtythree.stock63.domestic.kospi.dto.RealTimeInfo;
 import com.sixtythree.stock63.domestic.kospi.dto.StockDto;
 import com.sixtythree.stock63.domestic.kospi.entity.KospiDailyPrice;
 import com.sixtythree.stock63.domestic.kospi.entity.KospiItem;
+import com.sixtythree.stock63.domestic.kospi.entity.Token;
 import com.sixtythree.stock63.domestic.kospi.repository.KospiDailyPriceRepository;
 import com.sixtythree.stock63.domestic.kospi.repository.KospiItemRepository;
+import com.sixtythree.stock63.domestic.util.CustomWebSocketListener;
 import lombok.RequiredArgsConstructor;
+import okhttp3.*;
 import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -18,8 +29,15 @@ public class KospiService {
     private final KospiItemRepository kospiItemRepository;
     private final KospiDailyPriceRepository kospiDailyPriceRepository;
 
+    String appkey = "PSM3WXIVMo4X2UnaIJCubQl4M9RCNfbm5C6V";
+    String appsecret = "6J/t0za0MCCNCb74d0+/71iexBomHiT6NQJqx4YZandzS3k5Zb+gzgKdbyludx8xGnTzecmPpjspCteGLnGMVOnOIRpOCBV6Cqax4+xPkpj2rvk4NjNs8YR4PeGWoTb35T+wCnGYgalMOtoj1wcK4WDkg0XXA77jz+rE5qxULJbyA683TV8=";
+
+
     public ResponseEntity<List<StockDto>> stockList(int period, int gradient) {
+
+        // 코스피 모든 종목 정보 불러오기
         List<KospiItem> kospiItems = kospiItemRepository.findAllOrderByPrdyAvlsScalDesc2();
+        // 종목코드 키에 대한 데일리주가 객체 배열 값
         Map<String, KospiDailyPrice[]> dailyInfoMap = new HashMap<>();
         for (KospiItem kospiItem : kospiItems) {
             dailyInfoMap.put(kospiItem.getMkscShrnIscd(), new KospiDailyPrice[period+1]);
@@ -27,6 +45,13 @@ public class KospiService {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         Calendar cal = Calendar.getInstance();
+
+        cal.setTime(new Date());
+        cal.add(Calendar.DATE, -30);
+        String deleteDate = sdf.format(cal.getTime());
+        kospiDailyPriceRepository.deleteAllByStckBsopDate(deleteDate);
+
+
         cal.setTime(new Date());
         cal.add(Calendar.DATE, -1);
         String endDate = sdf.format(cal.getTime());
@@ -132,6 +157,61 @@ public class KospiService {
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    public RealTimeInfo getRealTimeInfo(String mkscShrnIscd){
+
+        RealTimeInfo realTimeInfo = null;
+
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url("ws://ops.koreainvestment.com:31000/tryitout/H0STCNT0")
+                .build();
+
+        ObjectNode jsonNode = JsonNodeFactory.instance.objectNode();
+        ObjectNode headerNode = JsonNodeFactory.instance.objectNode();
+        ObjectNode bodyNode = JsonNodeFactory.instance.objectNode();
+        ObjectNode inputNode = JsonNodeFactory.instance.objectNode();
+        inputNode.put("tr_id", "H0STCNT0");
+        inputNode.put("tr_key", mkscShrnIscd);
+        bodyNode.set("input", inputNode);
+        headerNode.put("appkey", appkey);
+        headerNode.put("appsecret", appsecret);
+        headerNode.put("custtype", "P");
+        headerNode.put("tr_type", "1");
+        headerNode.put("content-type", "utf-8");
+        jsonNode.set("header", headerNode);
+        jsonNode.set("body", bodyNode);
+
+        CustomWebSocketListener webSocketListener = new CustomWebSocketListener();
+        webSocketListener.setParameter(jsonNode.toString());
+
+        client.newWebSocket(request, webSocketListener);
+        client.dispatcher().executorService().shutdown();
+        return null;
+    }
+
+//    private String getWebSocketKey(){
+//        //api요청 준비
+//        RestTemplate restTemplate = new RestTemplate();
+//        HttpHeaders headers = new HttpHeaders();
+//        ResponseEntity<Map> res;
+//        // headeer, body setting
+//        ObjectNode jsonNodes = JsonNodeFactory.instance.objectNode();
+//        jsonNodes.put("grant_type","client_credentials");
+//        jsonNodes.put("appkey",appkey);
+//        jsonNodes.put("secretkey",appsecret);
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//        HttpEntity<JsonNode> requestToken = new HttpEntity<>(jsonNodes, headers);
+//        // 토큰 요청
+//        res = restTemplate.exchange(
+//                "https://openapivts.koreainvestment.com:29443/oauth2/Approval",
+//                HttpMethod.POST,
+//                requestToken,
+//                Map.class
+//        );
+//        String approvalKey = (String) res.getBody().get("approval_key");
+//        return approvalKey;
+//    }
 
     private int getTimeDays(String date){
         int year = Integer.parseInt(date.substring(0, 4)) * 12 * 30;

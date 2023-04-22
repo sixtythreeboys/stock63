@@ -31,4 +31,10 @@ public class KospiController {
         return kospiService.stockList(period, gradient);
     }
 
+    @ResponseBody
+    @GetMapping("test")
+    public String test(){
+        return "test";
+    }
+
 }
