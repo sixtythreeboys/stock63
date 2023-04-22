@@ -49,7 +49,7 @@ public class KospiService {
         cal.setTime(new Date());
         cal.add(Calendar.DATE, -30);
         String deleteDate = sdf.format(cal.getTime());
-        kospiDailyPriceRepository.deleteAllByStckBsopDate(deleteDate);
+//        kospiDailyPriceRepository.deleteAllByStckBsopDate(deleteDate);
 
 
         cal.setTime(new Date());
