@@ -4,21 +4,25 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.sixtythree.stock63.domestic.kospi.dto.RealTimeInfo;
 import com.sixtythree.stock63.domestic.kospi.dto.StockDto;
 import com.sixtythree.stock63.domestic.kospi.entity.KospiDailyPrice;
 import com.sixtythree.stock63.domestic.kospi.entity.KospiItem;
 import com.sixtythree.stock63.domestic.kospi.entity.Token;
 import com.sixtythree.stock63.domestic.kospi.repository.KospiDailyPriceRepository;
 import com.sixtythree.stock63.domestic.kospi.repository.KospiItemRepository;
+import com.sixtythree.stock63.domestic.kospi.repository.TokenRepository;
 import com.sixtythree.stock63.domestic.util.CustomWebSocketListener;
 import lombok.RequiredArgsConstructor;
 import okhttp3.*;
 import org.springframework.http.*;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -28,12 +32,13 @@ public class KospiService {
 
     private final KospiItemRepository kospiItemRepository;
     private final KospiDailyPriceRepository kospiDailyPriceRepository;
+    private final TokenRepository tokenRepository;
 
     String appkey = "PSM3WXIVMo4X2UnaIJCubQl4M9RCNfbm5C6V";
     String appsecret = "6J/t0za0MCCNCb74d0+/71iexBomHiT6NQJqx4YZandzS3k5Zb+gzgKdbyludx8xGnTzecmPpjspCteGLnGMVOnOIRpOCBV6Cqax4+xPkpj2rvk4NjNs8YR4PeGWoTb35T+wCnGYgalMOtoj1wcK4WDkg0XXA77jz+rE5qxULJbyA683TV8=";
 
 
-    public ResponseEntity<List<StockDto>> stockList(int period, int gradient) {
+    public ResponseEntity<List<StockDto>> stockList(int period, int gradient, int avlsScal) {
 
         // 코스피 모든 종목 정보 불러오기
         List<KospiItem> kospiItems = kospiItemRepository.findAllOrderByPrdyAvlsScalDesc2();
@@ -69,6 +74,9 @@ public class KospiService {
         //상승
         if (gradient > 0) {
             for (KospiItem kospiItem : kospiItems) {
+                if (Integer.parseInt(kospiItem.getPrdyAvlsScal()) < avlsScal) {
+                    continue;
+                }
                 // 종목일별리스트를 불러온다.
                 KospiDailyPrice[] arr = dailyInfoMap.get(kospiItem.getMkscShrnIscd());
                 // 첫 기준값 설정 / 값이 비어있는경우(휴장 or 누락) 스킵한다.
@@ -113,6 +121,9 @@ public class KospiService {
         //하락
         } else if (gradient < 0) {
             for (KospiItem kospiItem : kospiItems) {
+                if (Integer.parseInt(kospiItem.getPrdyAvlsScal()) < avlsScal) {
+                    continue;
+                }
                 // 휴장일은 모두 제외함.
                 // period : 휴장일을 포함한 일수
                 // period보다는 날짜 형식으로 요청을 받는게 좋을 것 같다.(휴장일을 모두 고려하기 어려움)
@@ -158,60 +169,102 @@ public class KospiService {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    public RealTimeInfo getRealTimeInfo(String mkscShrnIscd){
+    public ResponseEntity<List<KospiDailyPrice>> getPriceByPeriod(String mkscShrnIscd, String periodDivCode) throws ParseException {
 
-        RealTimeInfo realTimeInfo = null;
+        List<KospiDailyPrice> result = new ArrayList<>();
 
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url("ws://ops.koreainvestment.com:31000/tryitout/H0STCNT0")
-                .build();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        String endDate = sdf.format(new Date());
 
-        ObjectNode jsonNode = JsonNodeFactory.instance.objectNode();
-        ObjectNode headerNode = JsonNodeFactory.instance.objectNode();
-        ObjectNode bodyNode = JsonNodeFactory.instance.objectNode();
-        ObjectNode inputNode = JsonNodeFactory.instance.objectNode();
-        inputNode.put("tr_id", "H0STCNT0");
-        inputNode.put("tr_key", mkscShrnIscd);
-        bodyNode.set("input", inputNode);
-        headerNode.put("appkey", appkey);
-        headerNode.put("appsecret", appsecret);
-        headerNode.put("custtype", "P");
-        headerNode.put("tr_type", "1");
-        headerNode.put("content-type", "utf-8");
-        jsonNode.set("header", headerNode);
-        jsonNode.set("body", bodyNode);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.DATE, -3650);
+        String startDate = sdf.format(cal.getTime());
 
-        CustomWebSocketListener webSocketListener = new CustomWebSocketListener();
-        webSocketListener.setParameter(jsonNode.toString());
 
-        client.newWebSocket(request, webSocketListener);
-        client.dispatcher().executorService().shutdown();
-        return null;
+        // token 가져오기
+        Token token = tokenRepository.findById("access_token").orElse(null);
+        // 만료된 토큰이면 업데이트 한다.
+        Date nowDate = new Date();
+        if (token == null || nowDate.compareTo(token.getExpired()) > 0) {
+            token = updateToken();
+        };
+
+
+        //api요청 준비
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Map> res;
+        // headeer, body setting
+        ObjectNode jsonNodes = JsonNodeFactory.instance.objectNode();
+        jsonNodes.put("grant_type","client_credentials");
+        jsonNodes.put("appkey",appkey);
+        jsonNodes.put("appsecret",appsecret);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<JsonNode> requestToken = new HttpEntity<>(jsonNodes, headers);
+
+        System.out.println(token.getValue());
+
+        HttpEntity<MultiValueMap<String, String>> request;
+        headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(token.getValue());
+        headers.add("appkey", appkey);
+        headers.add("appsecret", appsecret);
+        headers.add("tr_id", "FHKST03010100");
+        headers.add("custtype", "P");
+
+        UriComponents uriBuilder = UriComponentsBuilder.fromHttpUrl("https://openapivts.koreainvestment.com:29443/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice")
+                .queryParam("FID_COND_MRKT_DIV_CODE", "J")
+                .queryParam("FID_PERIOD_DIV_CODE", periodDivCode)
+                .queryParam("FID_ORG_ADJ_PRC", "0")
+                .queryParam("FID_INPUT_ISCD", mkscShrnIscd)
+                .queryParam("FID_INPUT_DATE_1", startDate)
+                .queryParam("FID_INPUT_DATE_2", endDate)
+                .build(true);
+        request = new HttpEntity<>(headers);
+        res = restTemplate.exchange(
+                uriBuilder.toString(),
+                HttpMethod.GET,
+                request,
+                Map.class
+        );
+        ArrayList<Map> kdpList = (ArrayList<Map>) res.getBody().get("output2");
+        for (Map map : kdpList) {
+            KospiDailyPrice kdp = new KospiDailyPrice(map);
+            kdp.setMkscShrnIscd(mkscShrnIscd);
+            result.add(kdp);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-//    private String getWebSocketKey(){
-//        //api요청 준비
-//        RestTemplate restTemplate = new RestTemplate();
-//        HttpHeaders headers = new HttpHeaders();
-//        ResponseEntity<Map> res;
-//        // headeer, body setting
-//        ObjectNode jsonNodes = JsonNodeFactory.instance.objectNode();
-//        jsonNodes.put("grant_type","client_credentials");
-//        jsonNodes.put("appkey",appkey);
-//        jsonNodes.put("secretkey",appsecret);
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//        HttpEntity<JsonNode> requestToken = new HttpEntity<>(jsonNodes, headers);
-//        // 토큰 요청
-//        res = restTemplate.exchange(
-//                "https://openapivts.koreainvestment.com:29443/oauth2/Approval",
-//                HttpMethod.POST,
-//                requestToken,
-//                Map.class
-//        );
-//        String approvalKey = (String) res.getBody().get("approval_key");
-//        return approvalKey;
-//    }
+    private Token updateToken() throws ParseException {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Map> res;
+        ObjectNode jsonNodes = JsonNodeFactory.instance.objectNode();
+        jsonNodes.put("grant_type","client_credentials");
+        jsonNodes.put("appkey",appkey);
+        jsonNodes.put("appsecret",appsecret);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<JsonNode> requestToken = new HttpEntity<>(jsonNodes, headers);
+        // 토큰 요청
+        res = restTemplate.exchange(
+                "https://openapivts.koreainvestment.com:29443/oauth2/tokenP",
+                HttpMethod.POST,
+                requestToken,
+                Map.class
+        );
+        String value = (String) res.getBody().get("access_token");
+        String expired = (String) res.getBody().get("access_token_token_expired");
+        Token token = new Token();
+        token.setTokenName("access_token");
+        token.setValue(value);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        token.setExpired(formatter.parse(expired));
+        token = tokenRepository.save(token);
+        return token;
+    }
 
     private int getTimeDays(String date){
         int year = Integer.parseInt(date.substring(0, 4)) * 12 * 30;

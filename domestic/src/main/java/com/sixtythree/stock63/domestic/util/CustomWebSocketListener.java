@@ -3,6 +3,8 @@ package com.sixtythree.stock63.domestic.util;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.SneakyThrows;
 import nonapi.io.github.classgraph.json.JSONUtils;
 import okhttp3.Response;
@@ -13,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import jakarta.websocket.Session;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class CustomWebSocketListener extends WebSocketListener {
@@ -21,7 +24,6 @@ public class CustomWebSocketListener extends WebSocketListener {
     private Session session;
     private Aes256 aes256;
     private String menuStr = "유가증권단축종목코드|주식체결시간|주식현재가|전일대비부호|전일대비|전일대비율|가중평균주식가격|주식시가|주식최고가|주식최저가|매도호가1|매수호가1|체결거래량|누적거래량|누적거래대금|매도체결건수|매수체결건수|순매수체결건수|체결강도|총매도수량|총매수수량|체결구분|매수비율|전일거래량대비등락율|시가시간|시가대비구분|시가대비|최고가시간|고가대비구분|고가대비|최저가시간|저가대비구분|저가대비|영업일자|신장운영구분코드|거래정지여부|매도호가잔량|매수호가잔량|총매도호가잔량|총매수호가잔량|거래량회전율|전일동시간누적거래량|전일동시간누적거래량비율|시간구분코드|임의종료구분코드|정적VI발동기준가";
-
     public CustomWebSocketListener(Session session) {
         this.session = session;
     }
@@ -50,29 +52,45 @@ public class CustomWebSocketListener extends WebSocketListener {
     @Override
     public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
 //        super.onMessage(webSocket, text);
-//        System.out.println(text);
-        if (text.isEmpty()) return;
+        System.out.println(text);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode map = objectMapper.treeToValue(objectMapper.readTree(text), JsonNode.class);
-        JsonNode body = map.get("body");
-
-        // 230501 :: 웹소켓 응답 파싱 및 AES256 복호화 테스트코드
-        // 장 운영시간에 테스트해야함..
-        if (body.isEmpty()) {
+        if (text.contains("header") && text.contains("body")){
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode map = objectMapper.treeToValue(objectMapper.readTree(text), JsonNode.class);
+            JsonNode body = map.get("body");
+            String iv = body.get("output").get("iv").toString().replaceAll("\"", "");
+            String key = body.get("output").get("key").toString().replaceAll("\"", "");
+            System.out.println("iv :::::::::: " + iv + ".,,,," + iv.length());
+            System.out.println("KEY :::::::::: " + key);
+            aes256 = new Aes256(key, iv);
+        } else if (text.contains("^") && text.contains("|")) {
             String[] arr = text.split("\\|");
+            System.out.println("arr[0] ::::::::::: " + arr[0]);
             String[] data = arr[3].split("\\^");
+            System.out.println("data[0] ::::::::::: " + data[0]);
             String[] menuArr = menuStr.split("\\|");
-            for (int i = 0; i < menuArr.length; i++){
-                System.out.println(menuArr[i] + " :::::: " + aes256.decrypt(data[i]));
+            System.out.println("menuArr[0] ::::::::::: " + menuArr[0]);
+
+            String isEncrypted = arr[0];
+            int dataCnt = Integer.parseInt(arr[2]);
+            if (isEncrypted.equals("1")) {
+                for (int i = 0; i < data.length; i++) {
+                    data[i] = aes256.decrypt(data[i]);
+                }
+            }
+            int idx = 0;
+            for (int i = 0; i < dataCnt; i++) {
+                ObjectNode jsonNode = JsonNodeFactory.instance.objectNode();
+                for (String key : menuArr) {
+                    System.out.println(key + " :::::::::::::: " + data[idx]);
+                    jsonNode.put(key, data[idx]);
+                    idx++;
+                }
+                session.getBasicRemote().sendText(jsonNode.toString());
             }
         } else {
-            String iv = body.get("output").get("iv").toString();
-            String key = body.get("output").get("key").toString();
-            aes256 = new Aes256(key, iv);
+            return;
         }
-        session.getBasicRemote().sendText(text);
-//        System.out.println(jsonNode.toPrettyString());
     }
 
     @Override

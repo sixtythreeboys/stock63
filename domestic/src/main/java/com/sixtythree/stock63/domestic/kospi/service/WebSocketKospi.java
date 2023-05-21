@@ -54,8 +54,8 @@ public class WebSocketKospi {
         }
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-//                .url("ws://ops.koreainvestment.com:31000/tryitout/H0STCNT0")
-                .url("ws://15.164.171.244:8000/domestic/kospi/realtime")
+                .url("ws://ops.koreainvestment.com:31000/tryitout/H0STCNT0")
+//                .url("ws://15.164.171.244:8000/domestic/kospi/realtime")
                 .build();
 
         ObjectNode jsonNode = JsonNodeFactory.instance.objectNode();
