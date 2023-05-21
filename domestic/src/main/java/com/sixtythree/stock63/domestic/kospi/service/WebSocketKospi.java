@@ -41,6 +41,7 @@ public class WebSocketKospi {
     @OnClose
     public void onClose(Session session) throws Exception {
         CLIENTS.remove(session);
+        session.close();
         System.out.println("세션을 닫습니다. : " + session);
     }
 

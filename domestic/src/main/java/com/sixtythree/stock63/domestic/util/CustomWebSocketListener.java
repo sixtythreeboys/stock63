@@ -60,16 +60,11 @@ public class CustomWebSocketListener extends WebSocketListener {
             JsonNode body = map.get("body");
             String iv = body.get("output").get("iv").toString().replaceAll("\"", "");
             String key = body.get("output").get("key").toString().replaceAll("\"", "");
-            System.out.println("iv :::::::::: " + iv + ".,,,," + iv.length());
-            System.out.println("KEY :::::::::: " + key);
             aes256 = new Aes256(key, iv);
         } else if (text.contains("^") && text.contains("|")) {
             String[] arr = text.split("\\|");
-            System.out.println("arr[0] ::::::::::: " + arr[0]);
             String[] data = arr[3].split("\\^");
-            System.out.println("data[0] ::::::::::: " + data[0]);
             String[] menuArr = menuStr.split("\\|");
-            System.out.println("menuArr[0] ::::::::::: " + menuArr[0]);
 
             String isEncrypted = arr[0];
             int dataCnt = Integer.parseInt(arr[2]);
@@ -82,14 +77,16 @@ public class CustomWebSocketListener extends WebSocketListener {
             for (int i = 0; i < dataCnt; i++) {
                 ObjectNode jsonNode = JsonNodeFactory.instance.objectNode();
                 for (String key : menuArr) {
-                    System.out.println(key + " :::::::::::::: " + data[idx]);
                     jsonNode.put(key, data[idx]);
                     idx++;
                 }
                 session.getBasicRemote().sendText(jsonNode.toString());
             }
         } else {
-            return;
+            session.getBasicRemote().sendText("거래시간이 아닙니다");
+            webSocket.close(NORMAL_CLOSURE_STATUS, null);
+            webSocket.cancel();
+            session.close();
         }
     }
 
