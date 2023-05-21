@@ -74,7 +74,8 @@ public class KospiService {
         //상승
         if (gradient > 0) {
             for (KospiItem kospiItem : kospiItems) {
-                if (Integer.parseInt(kospiItem.getPrdyAvlsScal()) < avlsScal) {
+                if ((avlsScal >= 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) <= avlsScal)
+                        || (avlsScal < 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) > -avlsScal)) {
                     continue;
                 }
                 // 종목일별리스트를 불러온다.
@@ -121,7 +122,8 @@ public class KospiService {
         //하락
         } else if (gradient < 0) {
             for (KospiItem kospiItem : kospiItems) {
-                if (Integer.parseInt(kospiItem.getPrdyAvlsScal()) < avlsScal) {
+                if ((avlsScal >= 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) <= avlsScal)
+                        || (avlsScal < 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) >= -avlsScal)) {
                     continue;
                 }
                 // 휴장일은 모두 제외함.

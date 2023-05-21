@@ -29,7 +29,7 @@ public class KospiController {
             @RequestParam(name ="period",required = true) int period,
             @Parameter(description = "상승: 1 / 하락: -1")
             @RequestParam(name="gradient",required = true) int gradient,
-            @Parameter(description = "상승: 1 / 하락: -1")
+            @Parameter(description = "시가총액 / 양수: 이상, 음수: 이하")
             @RequestParam(name="avlsScal",required = false) int avlsScal
             ) {
         return kospiService.stockList(period, gradient, avlsScal);
