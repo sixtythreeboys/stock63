@@ -38,41 +38,48 @@ public class KospiService {
     String appsecret = "6J/t0za0MCCNCb74d0+/71iexBomHiT6NQJqx4YZandzS3k5Zb+gzgKdbyludx8xGnTzecmPpjspCteGLnGMVOnOIRpOCBV6Cqax4+xPkpj2rvk4NjNs8YR4PeGWoTb35T+wCnGYgalMOtoj1wcK4WDkg0XXA77jz+rE5qxULJbyA683TV8=";
 
 
-    public ResponseEntity<List<StockDto>> stockList(int period, int gradient, int avlsScal) {
-
+    public ResponseEntity<List<StockDto>> stockList(int period, int avlsScal) {
+        List<StockDto> result = new ArrayList<>();
         // 코스피 모든 종목 정보 불러오기
         List<KospiItem> kospiItems = kospiItemRepository.findAllOrderByPrdyAvlsScalDesc2();
-        // 종목코드 키에 대한 데일리주가 객체 배열 값
-        Map<String, KospiDailyPrice[]> dailyInfoMap = new HashMap<>();
-        for (KospiItem kospiItem : kospiItems) {
-            dailyInfoMap.put(kospiItem.getMkscShrnIscd(), new KospiDailyPrice[period+1]);
+
+        // startdate, enddate 정하기 -> 나중에 queryDSL로 짜보기..
+        int day = period > 0 ? period : -period;
+        Map<String, String> dateMap  = kospiDailyPriceRepository.findStartEndDate(day);
+        String startDate = dateMap.get("start_date");
+        String endDate = dateMap.get("end_date");
+        // 요청한 기간보다 더 작은 기간이 들어온 경우
+        if (startDate == null
+                || endDate == null
+                || Integer.parseInt(endDate) - Integer.parseInt(startDate) + 1 < day) {
+            return new ResponseEntity<>(result, HttpStatus.OK);
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        Calendar cal = Calendar.getInstance();
+        // 종목코드 키에 대한 데일리주가 객체 배열 값
+        day = Integer.parseInt(endDate) - Integer.parseInt(startDate) + 1;
+        Map<String, KospiDailyPrice[]> dailyInfoMap = new HashMap<>();
+        for (KospiItem kospiItem : kospiItems) {
+            dailyInfoMap.put(kospiItem.getMkscShrnIscd(), new KospiDailyPrice[day]);
+        }
 
-        cal.setTime(new Date());
-        cal.add(Calendar.DATE, -30);
-        String deleteDate = sdf.format(cal.getTime());
+        // 30일 지난 데이터 삭제
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+//        Calendar cal = Calendar.getInstance();
+//        cal.setTime(new Date());
+//        cal.add(Calendar.DATE, -30);
+//        String deleteDate = sdf.format(cal.getTime());
 //        kospiDailyPriceRepository.deleteAllByStckBsopDate(deleteDate);
 
 
-        cal.setTime(new Date());
-        cal.add(Calendar.DATE, -1);
-        String endDate = sdf.format(cal.getTime());
-        cal.add(Calendar.DATE, -period);
-        String startDate = sdf.format(cal.getTime());
+
         // startDate부터 endDate까지 일별주식 가격select
         List<KospiDailyPrice> kdpList = kospiDailyPriceRepository.findAllByStckBsopDateBetween(startDate, endDate);
         for (KospiDailyPrice kdp : kdpList) {
             int diffsDay = getTimeDays(kdp.getStckBsopDate()) - getTimeDays(startDate);
-//            dailyInfoMap.get(kdp.getMkscShrnIscd())[diffsDay] = Integer.parseInt(kdp.getStckClpr());
             dailyInfoMap.get(kdp.getMkscShrnIscd())[diffsDay] = kdp;
         }
-        //리턴값
-        List<StockDto> result = new ArrayList<>();
         //상승
-        if (gradient > 0) {
+        if (period > 0) {
             for (KospiItem kospiItem : kospiItems) {
                 if ((avlsScal >= 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) <= avlsScal)
                         || (avlsScal < 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) > -avlsScal)) {
@@ -120,7 +127,8 @@ public class KospiService {
                 }
             }
         //하락
-        } else if (gradient < 0) {
+        } else if (period < 0) {
+            period *= -1;
             for (KospiItem kospiItem : kospiItems) {
                 if ((avlsScal >= 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) <= avlsScal)
                         || (avlsScal < 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) >= -avlsScal)) {

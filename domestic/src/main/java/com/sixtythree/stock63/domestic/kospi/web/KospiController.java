@@ -25,14 +25,12 @@ public class KospiController {
     @ResponseBody
     @GetMapping("list")
     public ResponseEntity<List<StockDto>> rankList(
-            @Parameter(description = "연속 상승/하락 일수")
+            @Parameter(description = "연속 일수 / 양수: 상승, 음수: 하락")
             @RequestParam(name ="period",required = true) int period,
-            @Parameter(description = "상승: 1 / 하락: -1")
-            @RequestParam(name="gradient",required = true) int gradient,
             @Parameter(description = "시가총액 / 양수: 이상, 음수: 이하")
-            @RequestParam(name="avlsScal",required = false) int avlsScal
+            @RequestParam(name="avlsScal",required = false, defaultValue = "0") int avlsScal
             ) {
-        return kospiService.stockList(period, gradient, avlsScal);
+        return kospiService.stockList(period, avlsScal);
     }
 
     @ResponseBody
