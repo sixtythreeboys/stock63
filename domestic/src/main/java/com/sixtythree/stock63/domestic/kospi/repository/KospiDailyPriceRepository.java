@@ -16,7 +16,7 @@ public interface KospiDailyPriceRepository extends JpaRepository<KospiDailyPrice
 
     @Query(value = "select min(stck_bsop_date) as start_date, max(stck_bsop_date) as end_date" +
             " from (" +
-            "select stck_bsop_date from domestic_db.kospi_daily_price " +
+            "select stck_bsop_date from kospi_daily_price " +
             "group by stck_bsop_date " +
             "order by stck_bsop_date desc " +
             "limit :day" +
