@@ -89,7 +89,7 @@ public class KospiService {
                 KospiDailyPrice[] arr = dailyInfoMap.get(kospiItem.getMkscShrnIscd());
                 // 첫 기준값 설정 / 값이 비어있는경우(휴장 or 누락) 스킵한다.
                 int idx = 0;
-                while (idx <= period && arr[idx] == null) {
+                while (idx < period && arr[idx] == null) {
                     idx++;
                 }
                 int pivot, start;
@@ -102,7 +102,7 @@ public class KospiService {
                 }
                 // period만큼 연속 상승인지 확인. / 값이 비어있는 경우 스킵
                 boolean isTrue = true;
-                for (int i=idx; i<=period; i++) {
+                for (int i=idx; i<period; i++) {
                     if (arr[i] == null) continue;
                     // 연속 상승이 아닌경우 false
                     if (pivot >= Integer.parseInt(arr[i].getStckClpr())) {
@@ -139,7 +139,7 @@ public class KospiService {
                 // period보다는 날짜 형식으로 요청을 받는게 좋을 것 같다.(휴장일을 모두 고려하기 어려움)
                 KospiDailyPrice[] arr = dailyInfoMap.get(kospiItem.getMkscShrnIscd());
                 int idx = 0;
-                while (idx <= period && arr[idx] == null) {
+                while (idx < period && arr[idx] == null) {
                     idx++;
                 }
                 int pivot, start;
@@ -151,7 +151,7 @@ public class KospiService {
                     continue;
                 }
                 boolean isTrue = true;
-                for (int i=idx; i<=period; i++) {
+                for (int i=idx; i<period; i++) {
                     if (arr[i] == null) continue;
                     if (pivot <= Integer.parseInt(arr[i].getStckClpr())) {
                         isTrue = false;
