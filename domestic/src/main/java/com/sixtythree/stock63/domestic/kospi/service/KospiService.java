@@ -186,7 +186,9 @@ public class KospiService {
                     continue;
                 }
                 KospiDailyPrice[] arr = dailyInfoMap.get(kospiItem.getMkscShrnIscd());
-
+                if (arr[0] == null || arr[1] == null) {
+                    continue;
+                }
                 int start = Integer.parseInt(arr[0].getStckClpr());
                 KospiDailyPrice last = arr[1];
                 int pivot = Integer.parseInt(last.getStckClpr());
