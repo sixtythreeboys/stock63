@@ -44,7 +44,9 @@ public class KospiService {
         List<KospiItem> kospiItems = kospiItemRepository.findAllOrderByPrdyAvlsScalDesc2();
 
         // startdate, enddate 정하기 -> 나중에 queryDSL로 짜보기..
-        int day = period > 0 ? period : -period;
+        int day = period > 0 ? period+1 : -period+1;
+        if (day == 1) day++;
+
         Map<String, String> dateMap  = kospiDailyPriceRepository.findStartEndDate(day);
         String startDate = dateMap.get("start_date");
         String endDate = dateMap.get("end_date");
@@ -174,6 +176,30 @@ public class KospiService {
                     );
                     result.add(stockDto);
                 }
+            }
+        } else {
+            // period 0
+            for (KospiItem kospiItem : kospiItems) {
+                if ((avlsScal >= 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) <= avlsScal)
+                        || (avlsScal < 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) >= -avlsScal)) {
+                    continue;
+                }
+                KospiDailyPrice[] arr = dailyInfoMap.get(kospiItem.getMkscShrnIscd());
+
+                int start = Integer.parseInt(arr[0].getStckClpr());
+                KospiDailyPrice last = arr[1];
+                int pivot = Integer.parseInt(last.getStckClpr());
+                double totalCtrt =Math.round(((double)(pivot - start) / pivot)*10000)/100.0;
+                double prdyCtrt = Math.round(((double)Integer.parseInt(last.getPrdyVrss()) / Integer.parseInt(last.getStckClpr()))*10000)/100.0;
+                StockDto stockDto = new StockDto(
+                        kospiItem.getMkscShrnIscd(),
+                        kospiItem.getHtsKorIsnm(),
+                        pivot,
+                        kospiItem.getPrdyAvlsScal(),
+                        prdyCtrt,
+                        totalCtrt
+                );
+                result.add(stockDto);
             }
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
