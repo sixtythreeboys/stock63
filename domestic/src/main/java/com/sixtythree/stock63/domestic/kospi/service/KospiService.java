@@ -44,7 +44,8 @@ public class KospiService {
         List<KospiItem> kospiItems = kospiItemRepository.findAllOrderByPrdyAvlsScalDesc2();
 
         // startdate, enddate 정하기 -> 나중에 queryDSL로 짜보기..
-        int day = period > 0 ? period+1 : -period+1;
+        period = period >= 0 ? period + 1 : period - 1;
+        int day = Math.abs(period);
         if (day == 1) day++;
 
         Map<String, String> dateMap  = kospiDailyPriceRepository.findStartEndDate(day);
@@ -81,7 +82,7 @@ public class KospiService {
             dailyInfoMap.get(kdp.getMkscShrnIscd())[diffsDay] = kdp;
         }
         //상승
-        if (period > 0) {
+        if (period > 1) {
             for (KospiItem kospiItem : kospiItems) {
                 if ((avlsScal >= 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) <= avlsScal)
                         || (avlsScal < 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) > -avlsScal)) {
@@ -129,7 +130,7 @@ public class KospiService {
                 }
             }
         //하락
-        } else if (period < 0) {
+        } else if (period < -1) {
             period *= -1;
             for (KospiItem kospiItem : kospiItems) {
                 if ((avlsScal >= 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) <= avlsScal)
@@ -177,7 +178,7 @@ public class KospiService {
                     result.add(stockDto);
                 }
             }
-        } else {
+        } else if (period == 1) {
             // period 0
             for (KospiItem kospiItem : kospiItems) {
                 if ((avlsScal >= 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) <= avlsScal)
