@@ -59,7 +59,7 @@ public class KospiService {
         }
 
         // 종목코드 키에 대한 데일리주가 객체 배열 값
-        day = Integer.parseInt(endDate) - Integer.parseInt(startDate) + 1;
+        day = getTimeDays(endDate) - getTimeDays(startDate) + 1;
         Map<String, KospiDailyPrice[]> dailyInfoMap = new HashMap<>();
         for (KospiItem kospiItem : kospiItems) {
             dailyInfoMap.put(kospiItem.getMkscShrnIscd(), new KospiDailyPrice[day]);
@@ -92,12 +92,12 @@ public class KospiService {
                 KospiDailyPrice[] arr = dailyInfoMap.get(kospiItem.getMkscShrnIscd());
                 // 첫 기준값 설정 / 값이 비어있는경우(휴장 or 누락) 스킵한다.
                 int idx = 0;
-                while (idx < period && arr[idx] == null) {
+                while (idx < day && arr[idx] == null) {
                     idx++;
                 }
                 int pivot, start;
                 KospiDailyPrice last = null;
-                if (idx < period) {
+                if (idx < day) {
                     pivot = Integer.parseInt(arr[idx++].getStckClpr());
                     start = pivot;
                 } else {
@@ -105,7 +105,7 @@ public class KospiService {
                 }
                 // period만큼 연속 상승인지 확인. / 값이 비어있는 경우 스킵
                 boolean isTrue = true;
-                for (int i=idx; i<period; i++) {
+                for (int i=idx; i<day; i++) {
                     if (arr[i] == null) continue;
                     // 연속 상승이 아닌경우 false
                     if (pivot >= Integer.parseInt(arr[i].getStckClpr())) {
@@ -131,7 +131,6 @@ public class KospiService {
             }
         //하락
         } else if (period < -1) {
-            period *= -1;
             for (KospiItem kospiItem : kospiItems) {
                 if ((avlsScal >= 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) <= avlsScal)
                         || (avlsScal < 0 && Integer.parseInt(kospiItem.getPrdyAvlsScal()) >= -avlsScal)) {
@@ -142,19 +141,19 @@ public class KospiService {
                 // period보다는 날짜 형식으로 요청을 받는게 좋을 것 같다.(휴장일을 모두 고려하기 어려움)
                 KospiDailyPrice[] arr = dailyInfoMap.get(kospiItem.getMkscShrnIscd());
                 int idx = 0;
-                while (idx < period && arr[idx] == null) {
+                while (idx < day && arr[idx] == null) {
                     idx++;
                 }
                 int pivot, start;
                 KospiDailyPrice last = null;
-                if (idx < period) {
+                if (idx < day) {
                     pivot = Integer.parseInt(arr[idx++].getStckClpr());
                     start = pivot;
                 } else {
                     continue;
                 }
                 boolean isTrue = true;
-                for (int i=idx; i<period; i++) {
+                for (int i=idx; i<day; i++) {
                     if (arr[i] == null) continue;
                     if (pivot <= Integer.parseInt(arr[i].getStckClpr())) {
                         isTrue = false;
@@ -186,11 +185,11 @@ public class KospiService {
                     continue;
                 }
                 KospiDailyPrice[] arr = dailyInfoMap.get(kospiItem.getMkscShrnIscd());
-                if (arr[0] == null || arr[1] == null) {
+                if (arr[0] == null || arr[day-1] == null) {
                     continue;
                 }
                 int start = Integer.parseInt(arr[0].getStckClpr());
-                KospiDailyPrice last = arr[1];
+                KospiDailyPrice last = arr[day-1];
                 int pivot = Integer.parseInt(last.getStckClpr());
                 double totalCtrt =Math.round(((double)(pivot - start) / pivot)*10000)/100.0;
                 double prdyCtrt = Math.round(((double)Integer.parseInt(last.getPrdyVrss()) / Integer.parseInt(last.getStckClpr()))*10000)/100.0;
