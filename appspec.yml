@@ -24,7 +24,7 @@ os: linux
 #   may cause associated deployments to fail.
 files:
   - source: /
-    destination: /home/ubuntu/stock63/domestic
+    destination: /home/ubuntu/stock63
     overwrite: yes
   - source:
     destination:
@@ -80,22 +80,22 @@ hooks:
 # During the ApplicationStop deployment lifecycle event, run the commands 
 #   in the script specified in "location" starting from the root of the 
 #   revision's file bundle.
-  ApplicationStop:
-    - location: 
-      timeout:
-      runas:
-    - location: 
-      timeout:
-      runas: 
+  # ApplicationStop:
+  #   - location: 
+  #     timeout:
+  #     runas:
+  #   - location: 
+  #     timeout:
+  #     runas: 
 # During the BeforeInstall deployment lifecycle event, run the commands 
 #   in the script specified in "location".
-  BeforeInstall:
-    - location: 
-      timeout:
-      runas: 
-    - location: 
-      timeout:
-      runas:
+  # BeforeInstall:
+  #   - location: 
+  #     timeout:
+  #     runas: 
+  #   - location: 
+  #     timeout:
+  #     runas:
 # During the AfterInstall deployment lifecycle event, run the commands 
 #   in the script specified in "location".
   AfterInstall:
@@ -116,10 +116,10 @@ hooks:
       runas:
 # During the ValidateService deployment lifecycle event, run the commands 
 #   in the script specified in "location".
-  ValidateService:
-    - location:     
-      timeout: 
-      runas:
-    - location: 
-      timeout:
-      runas:
+  # ValidateService:
+  #   - location:     
+  #     timeout: 
+  #     runas:
+  #   - location: 
+  #     timeout:
+  #     runas:
