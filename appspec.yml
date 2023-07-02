@@ -24,7 +24,7 @@ os: linux
 #   may cause associated deployments to fail.
 files:
   - source: /domestic/
-    destination: /home/ubuntu/app
+    destination: /home/ubuntu/domestic
     overwrite: yes
 
 # For deployments to Amazon Linux, Ubuntu Server, or RHEL instances,
