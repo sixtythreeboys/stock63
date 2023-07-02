@@ -24,10 +24,9 @@ os: linux
 #   may cause associated deployments to fail.
 files:
   - source: /
-    destination: /home/ubuntu/stock63
+    destination: /home/ubuntu/app
     overwrite: yes
-  - source:
-    destination:
+
 # For deployments to Amazon Linux, Ubuntu Server, or RHEL instances,
 #   you can specify a "permissions" 
 #   section here that describes special permissions to apply to the files 
@@ -43,16 +42,7 @@ permissions:
     pattern: "**"
     except: ubuntu
     owner: ubuntu
-    group:
-    mode: 
-    acls:
-      -
-    context:
-      user:
-      type:
-      range:
-    type:
-      -
+    group: ubuntu
 # If you are not running any commands on the Amazon EC2 instance, then remove 
 #   the "hooks" section altogether. A blank or incomplete "hooks" section
 #   may cause associated deployments to fail.
@@ -102,18 +92,18 @@ hooks:
     - location: domestic/scripts/stop.sh     
       timeout: 60
       runas: ubuntu
-    - location: 
-      timeout:
-      runas:
+    # - location: 
+    #   timeout:
+    #   runas:
 # During the ApplicationStart deployment lifecycle event, run the commands 
 #   in the script specified in "location".
   ApplicationStart:
     - location: domestic/scripts/start.sh     
       timeout: 60
       runas: ubuntu
-    - location: 
-      timeout:
-      runas:
+    # - location: 
+    #   timeout:
+    #   runas:
 # During the ValidateService deployment lifecycle event, run the commands 
 #   in the script specified in "location".
   # ValidateService:

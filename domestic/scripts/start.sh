@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PROJECT_ROOT="/home/ubuntu/stock63/domestic"
+PROJECT_ROOT="/home/ubuntu/app/domestic"
 JAR_FILE="$PROJECT_ROOT/build/libs/domestic-0.0.1-SNAPSHOT.jar"
 
 APP_LOG="$PROJECT_ROOT/application.log"
