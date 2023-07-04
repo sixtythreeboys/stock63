@@ -1,9 +1,9 @@
 package com.sixtythree.stock63.domestic.kospi.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sixtythree.stock63.domestic.kospi.dto.PriceByPeriodDto;
 import com.sixtythree.stock63.domestic.kospi.dto.StockDto;
 import com.sixtythree.stock63.domestic.kospi.entity.KospiDailyPrice;
 import com.sixtythree.stock63.domestic.kospi.entity.KospiItem;
@@ -11,9 +11,7 @@ import com.sixtythree.stock63.domestic.kospi.entity.Token;
 import com.sixtythree.stock63.domestic.kospi.repository.KospiDailyPriceRepository;
 import com.sixtythree.stock63.domestic.kospi.repository.KospiItemRepository;
 import com.sixtythree.stock63.domestic.kospi.repository.TokenRepository;
-import com.sixtythree.stock63.domestic.util.CustomWebSocketListener;
 import lombok.RequiredArgsConstructor;
-import okhttp3.*;
 import org.springframework.http.*;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -207,9 +205,9 @@ public class KospiService {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    public ResponseEntity<List<KospiDailyPrice>> getPriceByPeriod(String mkscShrnIscd, String periodDivCode) throws ParseException {
+    public ResponseEntity<List<PriceByPeriodDto>> getPriceByPeriod(String mkscShrnIscd, String periodDivCode) throws ParseException {
 
-        List<KospiDailyPrice> result = new ArrayList<>();
+        List<PriceByPeriodDto> result = new ArrayList<>();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         String endDate = sdf.format(new Date());
@@ -223,6 +221,7 @@ public class KospiService {
         // token 가져오기
         Token token = tokenRepository.findById("access_token").orElse(null);
         // 만료된 토큰이면 업데이트 한다.
+        // 동시에 많은 요청이 들어오는 경우 Update가 여러번 동작함 -> 보완 방법?
         Date nowDate = new Date();
         if (token == null || nowDate.compareTo(token.getExpired()) > 0) {
             token = updateToken();
@@ -267,11 +266,18 @@ public class KospiService {
                 request,
                 Map.class
         );
-        ArrayList<Map> kdpList = (ArrayList<Map>) res.getBody().get("output2");
+        Map<String, String> output1 = (HashMap<String, String>) res.getBody().get("output1");
+        List<Map> kdpList = (ArrayList<Map>) res.getBody().get("output2");
         for (Map map : kdpList) {
-            KospiDailyPrice kdp = new KospiDailyPrice(map);
-            kdp.setMkscShrnIscd(mkscShrnIscd);
-            result.add(kdp);
+            PriceByPeriodDto pbp = new PriceByPeriodDto(map);
+            pbp.setMkscShrnIscd(mkscShrnIscd);
+            int pv = Integer.parseInt(pbp.getPrdyVrss());
+            int yStckClpr = Integer.parseInt(pbp.getStckClpr()) - pv;
+            if (yStckClpr != 0) {
+                double prdyCtrt = Math.round((pv / (double)yStckClpr)*10000) / 100.0;
+                pbp.setPrdyCtrt(prdyCtrt);
+            }
+            result.add(pbp);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

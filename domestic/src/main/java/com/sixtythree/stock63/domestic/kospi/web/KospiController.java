@@ -1,5 +1,6 @@
 package com.sixtythree.stock63.domestic.kospi.web;
 
+import com.sixtythree.stock63.domestic.kospi.dto.PriceByPeriodDto;
 import com.sixtythree.stock63.domestic.kospi.dto.StockDto;
 import com.sixtythree.stock63.domestic.kospi.entity.KospiDailyPrice;
 import com.sixtythree.stock63.domestic.kospi.entity.KospiItem;
@@ -35,7 +36,7 @@ public class KospiController {
 
     @ResponseBody
     @GetMapping("pirce-by-period")
-    public ResponseEntity<List<KospiDailyPrice>> priceByPeriod(
+    public ResponseEntity<List<PriceByPeriodDto>> priceByPeriod(
             @Parameter(description = "종목코드")
             @RequestParam(name="종목코드", required = true) String mkscShrnIscd,
             @Parameter(description = "기간분류코드 - D:일봉/W:주봉/M:월봉/Y:연봉")
